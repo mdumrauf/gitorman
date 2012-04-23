@@ -6,6 +6,8 @@ group :development do
   gem "bundler", "~> 1.1.3"
   gem "jeweler", "~> 1.8.3"
   gem "mocha", "~> 0.10.3"
+  #libmysqlclient16-dev  
+  gem "mysql"
   #gem "pry" # active for debug
 end
 

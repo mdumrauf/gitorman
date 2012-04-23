@@ -2,6 +2,7 @@
 require 'rubygems'
 require 'github_api'
 require 'logger'
+require 'mysql'
 
 $logger = Logger.new($stdout)
 
@@ -75,6 +76,30 @@ class GithubManager
 
 end
 
-client = GithubManager.new("sisoputnfrba", "mdumrauf", "************")
-client.create_repo("2012-1c-recursantes-vitalicios", "El repo de prueba mas copado de todos")
-client.create_team("2012-1c-recursantes-vitalicios", ["mdumrauf", "jarlakxen", "gastonprieto", "pedropicapiedraasdasd222"])
+#client = GithubManager.new("sisoputnfrba", "mdumrauf", "************")
+#client.create_repo("2012-1c-recursantes-vitalicios", "El repo de prueba mas copado de todos")
+#client.create_team("2012-1c-recursantes-vitalicios", ["mdumrauf", "jarlakxen", "gastonprieto", "pedropicapiedraasdasd222"])
+
+begin
+  db = Mysql.real_connect("some ip", "some user", "some password", "some db")
+  
+  query = "select a.legajo AS legajo, g.nombre AS grupo, a.repo as 'github user'"
+  query += "from ((alumnos a join grupos g) join asignaciones s)"
+  query += "where ((a.idAlumno = s.idAlumno) and (g.idGrupo = s.idGrupo) and (g.confirmado = 2))"
+  query += "order by g.nombre,a.legajo"
+  
+  res = db.query(query)
+  
+  grupos = Hash.new{|h,k| h[k] = []}
+  res.each {|row| grupos[row[1]] << row[2]}
+
+  grupos.each{|grupo, alumnos| puts "#{grupo}: #{alumnos.join(", ")}"}
+
+rescue Mysql::Error => e
+  $logger.error "Error code: #{e.errno}"
+  $logger.error "Error message: #{e.error}"
+  $logger.error "Error SQLSTATE: #{e.sqlstate}" if e.respond_to?("sqlstate")
+ensure
+  # disconnect from server
+  db.close if db
+end
