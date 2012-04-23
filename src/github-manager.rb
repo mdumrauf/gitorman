@@ -24,19 +24,20 @@ class GithubManager
   end
 
   def initialize_repo(team_name, repo_name)
+    folder_name = team_name.gsub(" ", ".")
     `
-      cp template-group/ #{team_name}
-      cd #{team_name}
-      echo "# #{team_name}" > README.md
-      echo "" >> README.md
-      tree . >> README.md
-      git init
-      git add .
-      git commit -m 'First commit.'
-      git remote add origin git@github.com:sisoputnfrba/#{repo_name}.git
-      git push -u origin master
-      cd ..
-      rm -rf #{team_name}
+      cp -R template-group/ ./#{folder_name} &&
+      cd ./#{folder_name} &&
+      echo "# #{team_name}" > ./README.md &&
+      echo "" >> ./README.md &&
+      tree --dirsfirst . >> ./README.md &&
+      git init &&
+      git add . &&
+      git commit -m 'First commit.' &&
+      git remote add origin git@github.com:sisoputnfrba/#{repo_name}.git &&
+      git push -u origin master &&
+      cd ../ &&
+      rm -rf #{folder_name}
     `
   end
 
@@ -76,9 +77,12 @@ class GithubManager
 
 end
 
-#client = GithubManager.new("sisoputnfrba", "mdumrauf", "************")
-#client.create_repo("2012-1c-recursantes-vitalicios", "El repo de prueba mas copado de todos")
-#client.create_team("2012-1c-recursantes-vitalicios", ["mdumrauf", "jarlakxen", "gastonprieto", "pedropicapiedraasdasd222"])
+# client = GithubManager.new("sisoputnfrba", "mdumrauf", "************")
+# client.create_repo("2012-1c-recursantes-vitalicios", "El repo de prueba mas copado de todos")
+# client.create_team("2012-1c-recursantes-vitalicios", ["mdumrauf", "jarlakxen", "gastonprieto", "pedropicapiedraasdasd222"])
+
+#client.initialize_repo("Recursantes Vitalicios", "2012-1c-recursantes-vitalicios")
+
 
 begin
   db = Mysql.real_connect("some ip", "some user", "some password", "some db")
