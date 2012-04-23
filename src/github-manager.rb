@@ -2,15 +2,15 @@
 require 'rubygems'
 require 'github_api'
 require 'logger'
-require 'mysql'
 
-$logger = Logger.new($stdout)
+$logger = Logger.new("github-manager.log")
 
 class GithubManager
   attr_reader :client
 
   def initialize(organization, login, pass)
-    @org = organization
+    @org    = organization
+    @login  = login
     @client = Github.new(:login => login, :password => pass, :org => @org)
   end
   
@@ -28,12 +28,14 @@ class GithubManager
     `
       cp -R template-group/ ./#{folder_name} &&
       cd ./#{folder_name} &&
-      echo "# #{team_name}" > ./README.md &&
-      echo "" >> ./README.md &&
-      tree --dirsfirst . >> ./README.md &&
+      echo "# #{team_name}" > ./README-aux.md &&
+      echo "" >> ./README-aux.md &&
+      cat README.md >> ./README-aux.md &&
+      cat README-aux.md > README.md &&
+      rm README-aux.md &&
       git init &&
       git add . &&
-      git commit -m 'First commit.' &&
+      git commit -m 'First commit' &&
       git remote add origin git@github.com:sisoputnfrba/#{repo_name}.git &&
       git push -u origin master &&
       cd ../ &&
@@ -55,10 +57,13 @@ class GithubManager
       if valid_user?(user)
         @client.orgs.add_member(team.id, user)
       else
-        $logger.warn("User: #{user} from Group: #{team_name} is invalid.
-         It will not be included in the team.")
+        $logger.warn("User: #{user} from Group: #{team_name} is invalid.")
       end
     }
+  end
+
+  def add_team_to_repo(team_id, repo_name)
+    @client.orgs.add_team_repo(team_id, @org, repo_name)
   end
 
   def delete_team(team_name)
@@ -75,35 +80,4 @@ class GithubManager
     user != nil
   end
 
-end
-
-# client = GithubManager.new("sisoputnfrba", "mdumrauf", "************")
-# client.create_repo("2012-1c-recursantes-vitalicios", "El repo de prueba mas copado de todos")
-# client.create_team("2012-1c-recursantes-vitalicios", ["mdumrauf", "jarlakxen", "gastonprieto", "pedropicapiedraasdasd222"])
-
-#client.initialize_repo("Recursantes Vitalicios", "2012-1c-recursantes-vitalicios")
-
-
-begin
-  db = Mysql.real_connect("some ip", "some user", "some password", "some db")
-  
-  query = "select a.legajo AS legajo, g.nombre AS grupo, a.repo as 'github user'"
-  query += "from ((alumnos a join grupos g) join asignaciones s)"
-  query += "where ((a.idAlumno = s.idAlumno) and (g.idGrupo = s.idGrupo) and (g.confirmado = 2))"
-  query += "order by g.nombre,a.legajo"
-  
-  res = db.query(query)
-  
-  grupos = Hash.new{|h,k| h[k] = []}
-  res.each {|row| grupos[row[1]] << row[2]}
-
-  grupos.each{|grupo, alumnos| puts "#{grupo}: #{alumnos.join(", ")}"}
-
-rescue Mysql::Error => e
-  $logger.error "Error code: #{e.errno}"
-  $logger.error "Error message: #{e.error}"
-  $logger.error "Error SQLSTATE: #{e.sqlstate}" if e.respond_to?("sqlstate")
-ensure
-  # disconnect from server
-  db.close if db
 end
