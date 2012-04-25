@@ -12,7 +12,7 @@ group :development do
 end
 
 group :default do
-  gem "github_api"
+  gem "github_api", "~> 0.4.11"
   gem "json", "~> 1.6.4"
   gem "trollop", "~> 1.16.2"
 end
