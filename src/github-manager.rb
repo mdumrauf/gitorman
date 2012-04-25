@@ -24,7 +24,7 @@ class GithubManager
   end
 
   def initialize_repo(team_name, repo_name)
-    folder_name = team_name.gsub(" ", ".")
+    folder_name = team_name.strip.gsub(" ", ".")
     `
       cp -R template-group/ ./#{folder_name} &&
       cd ./#{folder_name} &&
@@ -45,6 +45,13 @@ class GithubManager
 
   def delete_repo(repo_name)
     raise "Not yet implemented"
+  end
+
+
+  # type:
+  #   all, owner, public, private, member. Default: all.
+  def list_repos(type)
+    @client.repos.list_repos({:org => @org, :type => type})
   end
 
   def create_team(team_name, repo_name, users)
