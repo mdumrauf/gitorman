@@ -21,7 +21,7 @@ number_of_repos = 0
 
 groups.each{ |group, users|
 
-  repo_name = "2012-1c-#{group.downcase.gsub(" ", "-")}"
+  repo_name = "2012-1c-#{group.downcase.strip.gsub(" ", "-")}"
   team_name = group
 
   begin
