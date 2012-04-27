@@ -38,13 +38,17 @@ class GithubManager
       :permission => "push",
       :repo_names => ["#{@org}/#{repo_name}"]
     })
+    
+    invalid_users = []
+
     users.each { |user|
       if valid_user?(user)
         @client.orgs.add_member(team.id, user)
       else
-        $logger.warn("User: #{user} from Group: #{team_name} is invalid.")
+        invalid_users.push(user)
       end
     }
+    invalid_users
   end
 
   def add_team_to_repo(team_id, repo_name)

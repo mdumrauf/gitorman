@@ -31,4 +31,27 @@ class MysqlSisopHelper
 		groups
 	end
 
+	def get_mails(users)
+		begin
+		  db = Mysql.real_connect(@host, @user, @pass, @db_name)
+		  
+		  query = "select a.email from alumnos where"
+		  query += "a.repo = #{users[0]}"
+
+		  for i in 1..users.length do
+			  query += "or repo = #{users[i]}"
+		  end
+		  
+		  res = db.query(query)
+		  
+		  mails = []
+		  res.each { |row| mails[row[1]] << row[2]}
+		ensure
+		  # disconnect from server
+		  db.close if db
+		end
+
+		mails
+	end
+
 end
