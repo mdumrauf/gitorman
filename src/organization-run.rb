@@ -1,5 +1,9 @@
 #!/usr/bin/env ruby
-require 'github-organization-manager'
+
+$LOAD_PATH.unshift(File.join(File.dirname(__FILE__), '..', 'lib'))
+$LOAD_PATH.unshift(File.dirname(__FILE__))
+
+require 'github-manager'
 require 'mysql-sisop-helper'
 require 'logger'
 
@@ -7,8 +11,12 @@ $logger = Logger.new("github-manager.log")
 
 $logger.info "GitorMan initialized!"
 
+groups = []
+
+sql_instance = MysqlSisopHelper.new("xxx.xxx.xx.xx", "xxxxxxxxxx", "xxxxxxx", "xxxxxxx")
+
 begin
-	groups = MysqlSisopHelper::confirmed_groups("xxx.xxx.x.xxx", "xxxxxx", "xxxxxx", "xxxx")
+	groups = sql_instance.confirmed_groups
 
 rescue Mysql::Error => e
   $logger.error "Error code: #{e.errno}"
@@ -18,7 +26,7 @@ end
 
 $logger.info "#{groups.length} groups retrieved from database"
 
-client = GithubManager.new("sisoputnfrba", "mdumrauf", "*************")
+client = GithubManager.new("sisoputnfrba", "mdumrauf", "xxxxxxxx")
 
 id_team_ayudantes = "xxxxxxx"
 number_of_repos = 0
@@ -40,7 +48,7 @@ new_groups.each{ |group, users|
     client.create_repo(repo_name, "Implementacion del TP Yanero del grupo #{group}")
     client.create_team(team_name, repo_name, users)
 
-    client.initialize_repo(team_name, repo_name)
+    initialize_repo(team_name, repo_name)
 
     client.add_team_to_repo(id_team_ayudantes, repo_name)
   rescue Exception => e
@@ -54,3 +62,23 @@ new_groups.each{ |group, users|
 }
 
 $logger.info "#{number_of_repos} repos and teams were created"
+
+def initialize_repo(team_name, repo_name)
+  folder_name = team_name.strip.gsub(" ", ".")
+  `
+    cp -R template-group/ ./#{folder_name} &&
+    cd ./#{folder_name} &&
+    echo "# #{team_name}" > ./README-aux.md &&
+    echo "" >> ./README-aux.md &&
+    cat README.md >> ./README-aux.md &&
+    cat README-aux.md > README.md &&
+    rm README-aux.md &&
+    git init &&
+    git add . &&
+    git commit -m 'First commit' &&
+    git remote add origin git@github.com:sisoputnfrba/#{repo_name}.git &&
+    git push -u origin master &&
+    cd ../ &&
+    rm -rf #{folder_name}
+  `
+end
