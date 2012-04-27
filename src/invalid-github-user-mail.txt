@@ -1,0 +1,12 @@
+Hola,
+
+Este mail es para notificarte que el usuario de Github que registraste en el sistema de inscripciones es inválido. Por lo tanto, no se te pudieron asignar los permisos al repositorio de tu grupo.
+
+Te pedimos que lo corrijas a la brevedad y nos avises, así te podés sumar a tu equipo lo antes posible. Hasta entonces, no vas a poder commitear/pushear al repositorio de grupo.
+
+Si aún no te registraste, podés hacerlo a través de este link: https://github.com/signup/free.
+
+
+Saludos,
+
+La Cátedra
