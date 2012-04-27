@@ -13,6 +13,26 @@ $logger.info "GitorMan initialized!"
 
 groups = []
 
+def initialize_repo(team_name, repo_name)
+  folder_name = team_name.strip.gsub(" ", ".")
+  `
+    cp -R template-group/ ./#{folder_name} &&
+    cd ./#{folder_name} &&
+    echo "# #{team_name}" > ./README-aux.md &&
+    echo "" >> ./README-aux.md &&
+    cat README.md >> ./README-aux.md &&
+    cat README-aux.md > README.md &&
+    rm README-aux.md &&
+    git init &&
+    git add . &&
+    git commit -m 'First commit' &&
+    git remote add origin git@github.com:sisoputnfrba/#{repo_name}.git &&
+    git push -u origin master &&
+    cd ../ &&
+    rm -rf #{folder_name}
+  `
+end
+
 sql_instance = MysqlSisopHelper.new("xxx.xxx.xx.xx", "xxxxxxxxxx", "xxxxxxx", "xxxxxxx")
 
 begin
@@ -62,23 +82,3 @@ new_groups.each{ |group, users|
 }
 
 $logger.info "#{number_of_repos} repos and teams were created"
-
-def initialize_repo(team_name, repo_name)
-  folder_name = team_name.strip.gsub(" ", ".")
-  `
-    cp -R template-group/ ./#{folder_name} &&
-    cd ./#{folder_name} &&
-    echo "# #{team_name}" > ./README-aux.md &&
-    echo "" >> ./README-aux.md &&
-    cat README.md >> ./README-aux.md &&
-    cat README-aux.md > README.md &&
-    rm README-aux.md &&
-    git init &&
-    git add . &&
-    git commit -m 'First commit' &&
-    git remote add origin git@github.com:sisoputnfrba/#{repo_name}.git &&
-    git push -u origin master &&
-    cd ../ &&
-    rm -rf #{folder_name}
-  `
-end
