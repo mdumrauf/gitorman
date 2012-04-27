@@ -1,4 +1,3 @@
-#!/usr/bin/env ruby
 require 'rubygems'
 require 'github_api'
 require 'logger'
@@ -23,30 +22,9 @@ class GithubManager
     })
   end
 
-  def initialize_repo(team_name, repo_name)
-    folder_name = team_name.strip.gsub(" ", ".")
-    `
-      cp -R template-group/ ./#{folder_name} &&
-      cd ./#{folder_name} &&
-      echo "# #{team_name}" > ./README-aux.md &&
-      echo "" >> ./README-aux.md &&
-      cat README.md >> ./README-aux.md &&
-      cat README-aux.md > README.md &&
-      rm README-aux.md &&
-      git init &&
-      git add . &&
-      git commit -m 'First commit' &&
-      git remote add origin git@github.com:sisoputnfrba/#{repo_name}.git &&
-      git push -u origin master &&
-      cd ../ &&
-      rm -rf #{folder_name}
-    `
-  end
-
   def delete_repo(repo_name)
     raise "Not yet implemented"
   end
-
 
   # type:
   #   all, owner, public, private, member. Default: all.

@@ -1,12 +1,18 @@
-#!/usr/bin/env ruby
 require 'rubygems'
 require 'mysql'
 
 class MysqlSisopHelper
 
-	def self.confirmed_groups(host, user, pass, db_name)
+	def initialize(host, user, pass, db_name)
+		@host = host
+		@user = user
+		@pass = pass
+		@db_name = db_name
+	end
+
+	def confirmed_groups
 		begin
-		  db = Mysql.real_connect(host, user, pass, db_name)
+		  db = Mysql.real_connect(@host, @user, @pass, @db_name)
 		  
 		  query = "select a.legajo AS legajo, g.nombre AS grupo, a.repo as 'github user'"
 		  query += "from ((alumnos a join grupos g) join asignaciones s)"
@@ -20,7 +26,9 @@ class MysqlSisopHelper
 		ensure
 		  # disconnect from server
 		  db.close if db
+		end
 
 		groups
 	end
+
 end
