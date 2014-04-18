@@ -23,7 +23,7 @@ class GithubManager
   end
 
   def delete_repo(repo_name)
-    raise "Not yet implemented"
+    @client.repos.delete( @org, repo_name);
   end
 
   # type:
