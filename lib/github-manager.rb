@@ -14,7 +14,7 @@ class GithubManager
   end
   
   def create_repo(repo_name, description)
-    @client.repos.create_repo({
+    @client.repos.create({
       :org         => @org,
       :name        => repo_name,
       :description => description, 
@@ -29,18 +29,18 @@ class GithubManager
   # type:
   #   all, owner, public, private, member. Default: all.
   def list_repos(type)
-    @client.repos.list_repos({:org => @org, :type => type})
+    @client.repos.list({:org => @org, :type => type})
   end
 
   def create_team(team_name, repo_name, users)
-    team = @client.orgs.create_team(@org, {
+    team = @client.organizations.teams.create(@org,
       :name => team_name,
       :permission => "push",
       :repo_names => ["#{@org}/#{repo_name}"]
-    })
+    )
     users.each { |user|
       if valid_user?(user)
-        @client.orgs.add_member(team.id, user)
+        @client.organizations.teams.add_team_member(team.id, user)
       else
         $logger.warn("User: #{user} from Group: #{team_name} is invalid.")
       end
@@ -48,17 +48,17 @@ class GithubManager
   end
 
   def add_team_to_repo(team_id, repo_name)
-    @client.orgs.add_team_repo(team_id, @org, repo_name)
+    @client.organizations.teams.add_repo(team_id, @org, repo_name)
   end
 
   def delete_team(team_name)
-    team = @client.orgs.get_team(team_name)
-    @client.orgs.delete_team(team.id)
+    team = @client.organizations.teams.get(team_name)
+    @client.organizations.teams.delete(team.id)
   end
 
   def valid_user?(user_name)
     begin
-      user = @client.users.get_user(user_name)
+      user = @client.users.get(user_name)
     rescue
       user = nil
     end
