@@ -11,6 +11,8 @@ class GithubManager
     @org    = organization
     @login  = login
     @client = Github.new(:login => login, :password => pass, :org => @org)
+    @teams  = @client.organizations.teams.list(@org)
+    $logger.info "Teams size: #{@teams.length}"
   end
   
   def create_repo(repo_name, description)
@@ -45,6 +47,21 @@ class GithubManager
         $logger.warn("User: #{user} from Group: #{team_name} is invalid.")
       end
     }
+  end
+
+  def add_users(team_name, users)
+    team = @teams.find { |e| e['name'] == team_name }
+    if team != nil
+      users.each { |user|
+        if user.strip.length > 0 && valid_user?(user)
+          @client.organizations.teams.add_team_member(team.id, user)
+        else
+          $logger.warn("User: #{user} from Group: #{team_name} is invalid.")
+        end
+      }
+      else
+        $logger.warn("Team: #{team_name} is invalid.")
+      end
   end
 
   def add_team_to_repo(team_id, repo_name)
